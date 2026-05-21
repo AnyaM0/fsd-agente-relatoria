@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@keyframes slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+@theme {
+  --animate-slide: slide 1.4s ease-in-out infinite;
+}
+
+@font-face {
+  font-family: "Faktum";
+  src: url("/fonts/Faktum-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Faktum";
+  src: url("/fonts/Faktum-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --primary: #26bb58;
+  --primary-strong: #0c3027;
+  --primary-soft: #e8f5ed;
+  --primary-muted: #b8dbc5;
+  --green-oscuro-1: #2b4c38;
+  --green-oscuro-2: #369647;
+  --green-oscuro-3: #5fa847;
+  --green-vivo-1: #51cb75;
+  --green-vivo-2: #a8dfae;
+  --accent: #f59e0b;
+  --accent-strong: #d97706;
+  --accent-soft: #fef3c7;
+  --accent-muted: #fcd34d;
+  --surface: #fffdfb;
+  --surface-muted: #f7f4f0;
+  --surface-elevated: #ffffff;
+  --text: #2d2a26;
+  --text-secondary: #6b6560;
+  --border: #e8e4de;
+  --border-strong: #d4cfc7;
+  --focus: rgba(38, 187, 88, 0.32);
+  --shadow-sm: 0 1px 2px rgba(45, 42, 38, 0.06);
+  --shadow-md: 0 8px 22px rgba(45, 42, 38, 0.08);
+  --shadow-lg: 0 14px 38px rgba(45, 42, 38, 0.1);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --font-general:
+    "Faktum", "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", sans-serif;
+  --font-heading:
+    "Faktum", "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-general);
+  font-feature-settings: "ss01" on, "cv02" on;
+  letter-spacing: -0.01em;
+  background-color: var(--surface-muted);
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+.resource-preview-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.resource-preview-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

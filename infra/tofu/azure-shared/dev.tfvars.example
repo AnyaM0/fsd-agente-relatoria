@@ -1,0 +1,6 @@
+location       = "eastus2"
+environment    = "dev"
+project_prefix = "fsd"
+workload_name  = "domiactas"
+
+state_container_name = "tofu-state"

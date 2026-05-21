@@ -1,0 +1,45 @@
+location               = "eastus2"
+environment            = "dev"
+project_prefix         = "fsd"
+workload_name          = "domiactas"
+
+# Shared ACR from the shared stack
+acr_name                = "YOUR_SHARED_ACR_NAME"
+acr_resource_group_name = "YOUR_SHARED_ACR_RESOURCE_GROUP"
+
+# Push your images first, then point tofu at them.
+backend_image = "YOUR_REGISTRY/YOUR_BACKEND_IMAGE:TAG"
+worker_image  = "YOUR_REGISTRY/YOUR_WORKER_IMAGE:TAG"
+
+# Azure Speech
+azure_speech_region   = "eastus2"
+azure_speech_endpoint = "https://YOUR-SPEECH-RESOURCE.api.cognitive.microsoft.com/"
+azure_speech_api_key  = "YOUR_SPEECH_API_KEY"
+
+# Databricks
+databricks_base_url          = "https://YOUR-DATABRICKS-WORKSPACE.azuredatabricks.net/serving-endpoints"
+databricks_token             = "YOUR_DATABRICKS_TOKEN"
+segmentation_databricks_model = "databricks-claude-sonnet-4-6"
+
+# Backend auth
+backend_entra_enabled          = true
+backend_entra_tenant_id        = "YOUR_TENANT_ID"
+backend_entra_client_id        = "YOUR_APP_REG_CLIENT_ID"
+backend_entra_audience         = "api://YOUR_APP_REG_CLIENT_ID_OR_CUSTOM_URI"
+backend_admin_bootstrap_object_ids = ["YOUR_USER_OBJECT_ID"]
+
+# Frontend / notifications
+# Restrict blob_cors_allowed_origins to your frontend URL in production for security.
+# blob_cors_allowed_origins = ["https://YOUR-FRONTEND.z13.web.core.windows.net"]
+frontend_base_url               = ""
+create_frontend_static_website  = true
+notifications_email_enabled     = false
+notifications_email_backend     = "smtp"
+notifications_email_sender      = "noreply@example.org"
+notifications_email_reply_to    = "noreply@example.org"
+notifications_smtp_host         = "smtp.example.org"
+notifications_smtp_port         = 587
+notifications_smtp_username     = "smtp-user"
+notifications_smtp_password     = "smtp-pass"
+notifications_smtp_use_tls      = true
+notifications_smtp_use_ssl      = false

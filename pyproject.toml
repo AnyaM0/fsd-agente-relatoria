@@ -1,0 +1,47 @@
+[project]
+name = "fsd-agents"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.13.1",
+    "azure-ai-transcription>=1.0.0b3",
+    "azure-cosmos>=4.9.0",
+    "azure-identity>=1.25.3",
+    "azure-servicebus>=7.14.2",
+    "azure-storage-blob>=12.27.0",
+    "fastapi>=0.115.0",
+    "langchain>=1.0.0,<2.0.0",
+    "langchain-core>=1.0.0,<2.0.0",
+    "langchain-openai>=1.0.0,<2.0.0",
+    "langgraph>=1.0.0,<2.0.0",
+    "librosa>=0.11.0",
+    "markitdown[pptx]>=0.1.5",
+    "noisereduce>=3.0.3",
+    "pedalboard>=0.9.22",
+    "pyjwt[crypto]>=2.10.1",
+    "pydantic-settings>=2.10.1",
+    "python-multipart>=0.0.20",
+    "requests>=2.32.5",
+    "soundfile>=0.13.0",
+    "tiktoken>=0.11.0",
+    "uvicorn>=0.34.0",
+]
+
+[project.scripts]
+approval-memo-pipeline = "agents.compras.approval_memo.cli:main"
+audio-azure-env = "audio_tools.cli.azure_env:main"
+audio-prep = "audio_tools.cli.audio_prep:main"
+compras-acta-pipeline = "agents.compras.cli:main"
+juridica-acta-pipeline = "agents.juridica.cli:main"
+proyectos-acta-pipeline = "agents.proyectos.cli:main"
+meeting-acta-pipeline = "agents.shared_tools.meeting_minutes.cli:main"
+meeting-job-worker = "backend.workers.run_job_worker:main"
+backend-bootstrap-cosmos = "backend.scripts.bootstrap_cosmos:main"
+powerpoint-markdown = "agents.shared_tools.markitdown_tool.cli:main"
+segmentation-pipeline = "agents.shared_tools.segmentation_agent.cli:main"
+
+[tool.uv]
+# Install this project (editable) when syncing so `[project.scripts]` entry points
+# like `audio-prep` are generated in the environment.
+package = true
