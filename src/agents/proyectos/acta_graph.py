@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -12,6 +11,27 @@ from agents.proyectos.llm import build_proyectos_chat_model
 from agents.proyectos.minutes import create_proyectos_minutes_graph, write_proyectos_minutes_outputs
 from agents.shared_tools.meeting_minutes import transcribe_media_file
 from agents.shared_tools.segmentation_agent.pipeline import run_segmentation_pipeline_from_file, write_segmentation_outputs
+
+
+class _DictProxy:
+    """Adapts a plain dict into an attribute-access object for write_proyectos_minutes_outputs."""
+
+    def __init__(self, payload: dict[str, Any]) -> None:
+        self._payload = payload
+
+    def __getattr__(self, name: str):
+        try:
+            value = self._payload[name]
+        except KeyError as exc:
+            raise AttributeError(name) from exc
+        if isinstance(value, dict):
+            return _DictProxy(value)
+        if isinstance(value, list):
+            return [_DictProxy(item) if isinstance(item, dict) else item for item in value]
+        return value
+
+    def as_dict(self) -> dict[str, Any]:
+        return self._payload
 
 
 @dataclass(frozen=True)
@@ -223,37 +243,17 @@ def capture_proyectos_result(state: ProyectosActaGraphState) -> dict[str, object
         "acta_markdown": state["acta_markdown"],
         "final_validation": state["final_validation"].as_dict(),
     }
+    if "acta_metadata" in state:
+        proyectos_result["acta_metadata"] = state["acta_metadata"].as_dict()
     return {"proyectos_result": proyectos_result}
 
 
 def persist_result(state: ProyectosActaGraphState) -> dict[str, object]:
     output_dir = Path(state["output_dir"]).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    class _DictProxy:
-        def __init__(self, payload: dict[str, Any]) -> None:
-            self._payload = payload
-
-        def __getattr__(self, name: str):
-            value = self._payload[name]
-            if isinstance(value, dict):
-                return _DictProxy(value)
-            if isinstance(value, list):
-                return [_DictProxy(item) if isinstance(item, dict) else item for item in value]
-            return value
-
-        def as_dict(self) -> dict[str, Any]:
-            return self._payload
-
     proxy = _DictProxy(state["proyectos_result"])
     paths = write_proyectos_minutes_outputs(proxy, output_dir=output_dir)
-
-    acta_json_path = output_dir / "acta_proyectos_final.json"
-    acta_json_path.write_text(json.dumps(proxy.as_dict(), ensure_ascii=True, indent=2), encoding="utf-8")
-    acta_markdown_path = output_dir / "acta_proyectos_final.md"
-    acta_markdown_path.write_text(proxy.acta_markdown, encoding="utf-8")
-
-    return {"output_paths": {"acta_json": str(acta_json_path), "acta_markdown": str(acta_markdown_path), **paths}}
+    return {"output_paths": paths}
 
 
 def _resolve_variant(variant: str, *, has_ppt: bool) -> Literal["ppt_led", "chunk_led"]:

@@ -7,6 +7,8 @@ from langgraph.graph import END, START, StateGraph
 from typing_extensions import TypedDict
 
 from agents.proyectos.llm import build_proyectos_chat_model
+from agents.proyectos.minutes.acta_metadata_extractor import extract_acta_metadata
+from agents.proyectos.minutes.acta_metadata_models import ActaMetadata
 from agents.proyectos.minutes.assembler import assemble_acta, write_executive_summary
 from agents.proyectos.minutes.assignment_planner import plan_writer_assignments
 from agents.proyectos.minutes.chunk_io import load_chunk_contexts_with_segmentation
@@ -35,6 +37,7 @@ class ProyectosMinutesGraphState(TypedDict, total=False):
     model: Any
     ppt_context: PPTContext
     chunks: list[Any]
+    acta_metadata: ActaMetadata
     themes: list[ProjectTopic]
     assignments: list[WriterAssignment]
     drafts_by_assignment: dict[str, WriterDraft]
@@ -106,6 +109,7 @@ def run_proyectos_minutes_graph(
         status=final_state["status"],
         ppt_context=final_state["ppt_context"],
         chunks=final_state["chunks"],
+        acta_metadata=final_state["acta_metadata"],
         themes=final_state["themes"],
         assignments=final_state["assignments"],
         drafts=final_state["drafts"],
@@ -128,10 +132,13 @@ def load_context(state: ProyectosMinutesGraphState) -> dict[str, object]:
         state["chunk_dir"],
         segmentation_result_path=state["segmentation_result_path"],
     )
+    # Extracción de metadatos (una sola vez)
+    acta_metadata = extract_acta_metadata(ppt_context, chunks)
     return {
         "model": model,
         "ppt_context": ppt_context,
         "chunks": chunks,
+        "acta_metadata": acta_metadata,
         "clarification_requests": [],
         "current_review_requests": [],
         "current_review_round": 1,
@@ -147,7 +154,12 @@ def discover_topics(state: ProyectosMinutesGraphState) -> dict[str, object]:
 
 
 def plan_assignments_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
-    assignments = plan_writer_assignments(state["themes"], state["ppt_context"], state["chunks"], state["model"], variant=state["variant"])
+    meeting_type = state["acta_metadata"].variant if state.get("acta_metadata") else "comite"
+    assignments = plan_writer_assignments(
+        state["themes"], state["ppt_context"], state["chunks"], state["model"],
+        variant=state["variant"],
+        meeting_type=meeting_type,
+    )
     if not assignments:
         raise ValueError("No writer assignments could be planned for proyectos minutes.")
     return {"assignments": assignments}
@@ -155,6 +167,7 @@ def plan_assignments_node(state: ProyectosMinutesGraphState) -> dict[str, object
 
 def write_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
     drafts_by_assignment: dict[str, WriterDraft] = {}
+    meeting_type = state["acta_metadata"].variant if state.get("acta_metadata") else "comite"
     from agents.proyectos.minutes.writer_agent import write_assignment_draft
     for assignment in state["assignments"]:
         drafts_by_assignment[assignment.assignment_id] = write_assignment_draft(
@@ -162,12 +175,14 @@ def write_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
             state["chunks"],
             state["model"],
             variant=state["variant"],
+            meeting_type=meeting_type,
         )
     return {"drafts_by_assignment": drafts_by_assignment, "current_review_requests": []}
 
 
 def review_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
     current_drafts = [state["drafts_by_assignment"][assignment.assignment_id] for assignment in state["assignments"]]
+    meeting_type = state["acta_metadata"].variant if state.get("acta_metadata") else "comite"
     requests: list[ClarificationRequest] = []
     for assignment in state["assignments"]:
         request = review_writer_draft(
@@ -177,6 +192,7 @@ def review_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
             state["ppt_context"],
             state["model"],
             variant=state["variant"],
+            meeting_type=meeting_type,
             review_round=state["current_review_round"],
         )
         if request is not None:
@@ -197,6 +213,7 @@ def route_after_review(state: ProyectosMinutesGraphState) -> str:
 
 def revise_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
     revised = dict(state["drafts_by_assignment"])
+    meeting_type = state["acta_metadata"].variant if state.get("acta_metadata") else "comite"
     from agents.proyectos.minutes.writer_agent import revise_assignment_draft
     request_map = {request.assignment_id: request for request in state["current_review_requests"]}
     for assignment in state["assignments"]:
@@ -210,6 +227,7 @@ def revise_drafts_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
             state["chunks"],
             state["model"],
             variant=state["variant"],
+            meeting_type=meeting_type,
         )
     return {"drafts_by_assignment": revised, "current_review_round": state["current_review_round"] + 1}
 
@@ -222,12 +240,19 @@ def assemble_acta_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
         draft.status = "needs_revision" if assignment.assignment_id in unresolved else "approved"
         drafts.append(draft)
     executive_summary = write_executive_summary(drafts, state["themes"], state["model"])
-    acta_markdown = assemble_acta(drafts, state["themes"], executive_summary, state["assignments"])
+    acta_markdown = assemble_acta(
+        drafts,
+        state["themes"],
+        state["assignments"],
+        acta_metadata=state.get("acta_metadata"),
+        model=state.get("model"),
+    )
     return {"drafts": drafts, "executive_summary": executive_summary, "acta_markdown": acta_markdown}
 
 
 def validate_acta_node(state: ProyectosMinutesGraphState) -> dict[str, object]:
-    final_validation = validate_final_acta(state["acta_markdown"], state["ppt_context"], state["model"])
+    meeting_type = state["acta_metadata"].variant if state.get("acta_metadata") else "comite"
+    final_validation = validate_final_acta(state["acta_markdown"], state["ppt_context"], state["model"], meeting_type=meeting_type)
     unresolved = bool(state["current_review_requests"])
     status: Literal["approved", "needs_review"] = "approved" if final_validation.approved and not unresolved else "needs_review"
     return {"final_validation": final_validation, "status": status}

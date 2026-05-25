@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from agents.proyectos.minutes.acta_metadata_models import ActaMetadata
 from agents.shared_tools.meeting_minutes.models import (
     ChunkContext,
     ChunkSummaryRecord,
@@ -18,7 +19,14 @@ from agents.shared_tools.meeting_minutes.models import (
 )
 
 
-ProjectTopic = MeetingTheme
+@dataclass
+class ProjectTopic(MeetingTheme):
+    topic_type: Literal["iniciativa", "refrendacion", "general"] = "general"
+
+    def as_dict(self) -> dict[str, object]:
+        d = super().as_dict()
+        d["topic_type"] = self.topic_type
+        return d
 
 
 @dataclass
@@ -27,6 +35,7 @@ class ProyectosMinutesRunResult:
     status: Literal["approved", "needs_review"]
     ppt_context: PPTContext
     chunks: list[ChunkContext]
+    acta_metadata: ActaMetadata
     themes: list[ProjectTopic]
     assignments: list[WriterAssignment]
     drafts: list[WriterDraft]
@@ -41,6 +50,7 @@ class ProyectosMinutesRunResult:
             "status": self.status,
             "ppt_context": self.ppt_context.as_dict(),
             "chunks": [chunk.as_dict() for chunk in self.chunks],
+            "acta_metadata": self.acta_metadata.as_dict(),
             "themes": [theme.as_dict() for theme in self.themes],
             "assignments": [assignment.as_dict() for assignment in self.assignments],
             "drafts": [draft.as_dict() for draft in self.drafts],
@@ -57,6 +67,7 @@ class TopicCandidateModel(BaseModel):
     priority: int = Field(description="Importancia relativa, donde 1 es la más alta.")
     slide_refs: list[int] = Field(default_factory=list, description="Números de diapositiva relevantes.")
     selection_reason: str = Field(description="Por qué este tema es relevante para el acta del comité de proyectos.")
+    topic_type: Literal["iniciativa", "refrendacion", "general"] = Field(default="general", description="Clasifica si el tema es estrictamente un proyecto (iniciativa), una refrendación de un proyecto, o general.")
 
 
 class TopicDiscoveryModel(BaseModel):

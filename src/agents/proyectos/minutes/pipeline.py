@@ -47,6 +47,10 @@ def write_proyectos_minutes_outputs(
         "acta_json": output_dir / "acta_proyectos.json",
         "acta_markdown": output_dir / "acta_proyectos.md",
     }
+    if hasattr(result, "acta_metadata") and result.acta_metadata is not None:
+        metadata_path = output_dir / "acta_metadata.json"
+        metadata_path.write_text(json.dumps(result.acta_metadata.as_dict(), ensure_ascii=True, indent=2), encoding=encoding)
+        paths["acta_metadata"] = metadata_path
     paths["ppt_markdown"].write_text(result.ppt_context.markdown, encoding=encoding)
     paths["themes"].write_text(json.dumps([item.as_dict() for item in result.themes], ensure_ascii=True, indent=2), encoding=encoding)
     paths["assignments"].write_text(json.dumps([item.as_dict() for item in result.assignments], ensure_ascii=True, indent=2), encoding=encoding)

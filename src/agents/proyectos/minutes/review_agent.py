@@ -25,29 +25,50 @@ def review_writer_draft(
     model,
     *,
     variant: str,
+    meeting_type: str = "comite",
     review_round: int,
 ) -> ClarificationRequest | None:
+    if meeting_type == "precomite":
+        required_sections = (
+            "bullets de identificación (Unidad, Línea, Programa), "
+            "**Descripción:** en párrafos corridos (sin subtítulos, sin bullets, sin tablas), "
+            "**Estado:** con sub-bullets por área (Comunicaciones, Jurídica, Talento Humano), "
+            "**Decisión del Precomité:** con una oración declarativa y lista de items."
+        )
+        forbidden_sections = (
+            "resumen ejecutivo, características generales del proyecto, componentes, indicadores, "
+            "bloqueos o riesgos, próximas acciones, emojis, subtítulos dentro de la descripción, tablas dentro de la descripción."
+        )
+    else:
+        required_sections = (
+            "código del proyecto si se conoce, bullets de identificación (Unidad, Línea, Programa), "
+            "**Descripción:** en párrafos corridos (sin subtítulos, sin bullets, sin tablas), "
+            "**Decisión del Comité:** con una oración declarativa y lista de compromisos. "
+            "NO debe tener sección Estado."
+        )
+        forbidden_sections = (
+            "resumen ejecutivo, sección Estado por áreas, características generales, componentes, indicadores, "
+            "bloqueos o riesgos, próximas acciones, emojis, subtítulos dentro de la descripción, tablas dentro de la descripción."
+        )
     review = model.invoke_structured(
         (
-            f"Revisa esta sección del acta de comité de proyectos para la asignación {assignment.assignment_id}.\n"
-            f"Tema del proyecto: {assignment.theme_title}\n"
-            f"Variante: {variant}\n"
-            f"Instrucción de tarea: {assignment.task_instruction}\n"
-            f"Chunks asignados a este writer: {assignment.chunk_refs}\n"
-            f"Referencias PPT: {assignment.slide_refs}\n"
+            f"Revisa esta sección del acta para la asignación {assignment.assignment_id}.\n"
+            f"Iniciativa: {assignment.theme_title}\n"
+            f"Tipo de reunión: {meeting_type}\n"
+            f"Chunks asignados: {assignment.chunk_refs}\n"
             f"{_FOUNDATION_NOTE}\n\n"
-            f"Título actual de la sección: {draft.section_title}\n"
-            f"Resumen actual de la sección: {draft.section_summary}\n"
-            f"Markdown actual de la sección:\n{draft.body_markdown}\n\n"
-            f"Resumen de otras secciones:\n{render_draft_catalog(all_drafts, exclude_assignment_id=assignment.assignment_id)}\n\n"
+            f"Título de la sección: {draft.section_title}\n"
+            f"Markdown de la sección:\n{draft.body_markdown}\n\n"
             f"Extracto relevante del PPT:\n{render_ppt_excerpt(ppt_context, assignment.slide_refs)}"
         ),
         MinutesReviewModel,
         system_prompt=(
-            "Eres el revisor de un acta de comité de proyectos. "
+            f"Eres el revisor de un acta de {'Precomité' if meeting_type == 'precomite' else 'Comité'} de Proyectos. "
             f"{_FOUNDATION_NOTE} "
-            "Aprueba solo si la sección captura correctamente: el estado del proyecto, los avances reportados, "
-            "los bloqueos o riesgos identificados, las decisiones del comité y los compromisos con responsable y fecha. "
+            f"Aprueba SOLO si la sección contiene exactamente: {required_sections} "
+            f"Rechaza si contiene contenido prohibido: {forbidden_sections} "
+            "La Descripción debe tener 2 párrafos mínimo: párrafo 1 empieza con 'La iniciativa tiene como objetivo', "
+            "párrafo 2 contiene información financiera (valor total, aporte FSD, apalancamiento). "
             "Responde en español."
         ),
     )
@@ -63,13 +84,19 @@ def review_writer_draft(
     )
 
 
-def validate_final_acta(markdown: str, ppt_context: PPTContext, model) -> FinalValidation:
+def validate_final_acta(markdown: str, ppt_context: PPTContext, model, meeting_type: str = "comite") -> FinalValidation:
+    decision_label = "Decisión del Precomité" if meeting_type == "precomite" else "Decisión del Comité"
+    approval_word = "preaprobada" if meeting_type == "precomite" else "aprobada"
     validation = model.invoke_structured(
         (
-            "Valida esta acta de comité de proyectos como entregable final.\n"
-            "Revisa: cobertura de todos los proyectos discutidos, exactitud de los avances reportados, "
-            "claridad de las decisiones del comité, completitud de los compromisos con responsable y fecha, "
-            "y si los bloqueos o riesgos identificados quedaron explícitos.\n"
+            f"Valida esta acta de {'Precomité' if meeting_type == 'precomite' else 'Comité'} de Proyectos como entregable final.\n"
+            "Verifica que cada iniciativa contenga:\n"
+            "1. Bullets de identificación (Unidad, Línea, Programa)\n"
+            "2. **Descripción:** con al menos 2 párrafos corridos\n"
+            + ("3. **Estado:** por área (Comunicaciones, Jurídica, Talento Humano)\n" if meeting_type == "precomite" else "")
+            + f"{'4' if meeting_type == 'precomite' else '3'}. **{decision_label}:** con 'Iniciativa {approval_word}' y lista de items\n"
+            "Verifica que NO exista: resumen ejecutivo, sección Estado (solo comité), bloqueos/riesgos, próximas acciones, emojis.\n"
+            "Verifica que la tabla de Compromisos a la fecha esté presente.\n"
             f"{_FOUNDATION_NOTE}\n\n"
             f"Catálogo de diapositivas PPT:\n"
             + "\n".join(f"Slide {slide.slide_number}: {slide.title}" for slide in ppt_context.slides)
@@ -78,10 +105,10 @@ def validate_final_acta(markdown: str, ppt_context: PPTContext, model) -> FinalV
         ),
         MinutesFinalValidationModel,
         system_prompt=(
-            "Eres el revisor final de un acta de comité de proyectos. "
+            f"Eres el revisor final de un acta de {'Precomité' if meeting_type == 'precomite' else 'Comité'} de Proyectos. "
             f"{_FOUNDATION_NOTE} "
-            "Sé estricto con compromisos faltantes, responsables no identificados, "
-            "decisiones ambiguas y riesgos omitidos. Responde en español."
+            "Verifica estructura, completitud de la Descripción (párrafo objetivo + financiero), "
+            "y que la Decisión esté presente con al menos un item. Responde en español."
         ),
     )
     return FinalValidation(

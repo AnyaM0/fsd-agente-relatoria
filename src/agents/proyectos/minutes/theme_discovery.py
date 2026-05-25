@@ -23,8 +23,8 @@ def discover_ppt_led_topics(
     result = model.invoke_structured(
         (
             "Extrae los principales temas del comité de proyectos para un acta formal.\n"
-            "Enfócate en: proyectos discutidos, avances reportados, bloqueos o riesgos identificados, "
-            "decisiones del comité, compromisos adquiridos con responsables y fechas, y próximas acciones.\n"
+            "Un tema DEBE SER ESTRICTAMENTE una iniciativa (proyecto) o una refrendación que se evalúe o discuta.\n"
+            "PROHIBIDO crear temas para secciones de estado, resúmenes, compromisos o áreas transversales (ej. Comunicaciones, Talento Humano).\n"
             "El PowerPoint es la fuente principal de estructura.\n"
             f"{_FOUNDATION_NOTE}\n"
             f"Devuelve como máximo {max_themes} temas.\n\n"
@@ -36,8 +36,9 @@ def discover_ppt_led_topics(
         system_prompt=(
             "Diseñas actas de comités de proyectos a partir del contexto de un PowerPoint. "
             f"{_FOUNDATION_NOTE} "
-            "Prefiere temas que capturen el estado de cada proyecto, las decisiones tomadas por el comité "
-            "y los compromisos con responsable y fecha que surgieron en la reunión."
+            "Extrae únicamente las iniciativas (proyectos) y refrendaciones explícitamente presentadas. "
+            "Clasifícalas correctamente en 'iniciativa' o 'refrendacion' en su topic_type. "
+            "Nunca inventes temas a partir de compromisos, ni separes áreas transversales como si fueran proyectos independientes."
         ),
     )
     return _normalize_topics(result, source="ppt", max_themes=max_themes)
@@ -53,8 +54,8 @@ def discover_chunk_led_topics(
     result = model.invoke_structured(
         (
             "Extrae los principales temas del comité de proyectos para un acta formal.\n"
-            "Enfócate en: proyectos discutidos, avances reportados, bloqueos o riesgos identificados, "
-            "decisiones del comité, compromisos adquiridos con responsables y fechas, y próximas acciones.\n"
+            "Un tema DEBE SER ESTRICTAMENTE una iniciativa (proyecto) o una refrendación que se evalúe o discuta.\n"
+            "PROHIBIDO crear temas para secciones de estado, resúmenes, compromisos o áreas transversales (ej. Comunicaciones, Talento Humano).\n"
             "Los chunks de transcripción son la fuente principal de estructura.\n"
             f"{_FOUNDATION_NOTE}\n"
             f"Devuelve como máximo {max_themes} temas.\n\n"
@@ -66,8 +67,9 @@ def discover_chunk_led_topics(
         system_prompt=(
             "Diseñas actas de comités de proyectos a partir de chunks de transcripción. "
             f"{_FOUNDATION_NOTE} "
-            "Agrupa la conversación en temas coherentes por proyecto o área, preservando decisiones, "
-            "compromisos con responsable y fecha, y riesgos identificados. Responde en español."
+            "Extrae únicamente las iniciativas (proyectos) y refrendaciones presentadas. "
+            "Clasifícalas correctamente en 'iniciativa' o 'refrendacion' en su topic_type. "
+            "Nunca inventes temas a partir de compromisos, ni separes áreas transversales como si fueran proyectos independientes. Responde en español."
         ),
     )
     return _normalize_topics(result, source="chunks", max_themes=max_themes)
@@ -106,6 +108,7 @@ def _normalize_topics(result: TopicDiscoveryModel, *, source: str, max_themes: i
                 priority=max(theme.priority, 1),
                 slide_refs=sorted(set(theme.slide_refs)),
                 selection_reason=theme.selection_reason.strip(),
+                topic_type=theme.topic_type,
             )
         )
     topics.sort(key=lambda item: (item.priority, item.title.lower()))
