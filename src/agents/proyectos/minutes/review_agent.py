@@ -67,8 +67,8 @@ def review_writer_draft(
             f"{_FOUNDATION_NOTE} "
             f"Aprueba SOLO si la sección contiene exactamente: {required_sections} "
             f"Rechaza si contiene contenido prohibido: {forbidden_sections} "
-            "La Descripción debe tener 2 párrafos mínimo: párrafo 1 empieza con 'La iniciativa tiene como objetivo', "
-            "párrafo 2 contiene información financiera (valor total, aporte FSD, apalancamiento). "
+            "La Descripción debe constar exactamente de 2 a 3 párrafos en total (el Párrafo 1 de Objetivo y los párrafos de aportes financieros). "
+            "RECHAZA INMEDIATAMENTE si la Descripción incluye párrafos adicionales descriptivos u operativos que mencionen componentes del proyecto, duración, territorios de ejecución, rol de ejecutor de la Fundación, o desgloses presupuestales operativos. "
             "Responde en español."
         ),
     )
@@ -107,8 +107,9 @@ def validate_final_acta(markdown: str, ppt_context: PPTContext, model, meeting_t
         system_prompt=(
             f"Eres el revisor final de un acta de {'Precomité' if meeting_type == 'precomite' else 'Comité'} de Proyectos. "
             f"{_FOUNDATION_NOTE} "
-            "Verifica estructura, completitud de la Descripción (párrafo objetivo + financiero), "
-            "y que la Decisión esté presente con al menos un item. Responde en español."
+            "Verifica estructura y completitud de la Descripción: debe tener estrictamente 2 o 3 párrafos (Párrafo 1 de Objetivo + aportes financieros). "
+            "RECHAZA INMEDIATAMENTE si la Descripción incluye información operativa o de contexto sobre componentes del proyecto, duración, territorios de ejecución, rol ejecutor o desgloses operativos. "
+            "Verifica que la Decisión esté presente con al menos un item. Responde en español."
         ),
     )
     return FinalValidation(

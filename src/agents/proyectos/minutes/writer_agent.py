@@ -13,6 +13,12 @@ _FOUNDATION_NOTE = (
     "debe entenderse que se refiere a la Fundación Santo Domingo."
 )
 
+_IDENTIFICACION_NOTE = (
+    "REGLAS DE IDENTIFICACIÓN (Unidad, Línea, Programa):\n"
+    "- La 'Unidad' NO es lo mismo que la 'Línea'. Son conceptos e información distintos.\n"
+    "- Si la 'Unidad' (o cualquiera de los campos de identificación: Unidad, Línea, Programa) no se encuentra explícitamente plasmada en el PPTX, debes colocar 'Por definir' en su lugar. NO deduzcas la 'Unidad' a partir de la 'Línea' ni asumas que son iguales."
+)
+
 _PROHIBITED_CONTENT = (
     "NUNCA incluyas: resumen ejecutivo, características generales del proyecto (duración, territorio, rol FSD), "
     "componentes del proyecto, matriz de indicadores o metas, bloqueos y riesgos identificados, "
@@ -22,37 +28,45 @@ _PROHIBITED_CONTENT = (
 )
 
 _PARRAFO_LOGICA = (
-    "LÓGICA DE PÁRRAFOS para la Descripción de la iniciativa:\n\n"
-    "Párrafo 1 (siempre): Objetivo. Empieza EXACTAMENTE con: 'La iniciativa tiene como objetivo ' "
-    "A continuación, transcribe el objetivo EXACTAMENTE y de manera LITERAL como aparece en el PPTX. NO resumas ni omitas palabras del objetivo original.\n\n"
-    "REGLA CRÍTICA DE PRIORIDAD (TEXTO DESCRIPTIVO Y ETIQUETAS DE LA DIAPOSITIVA):\n"
+    "ESTRUCTURA OBLIGATORIA DE LA DESCRIPCIÓN DE LA INICIATIVA:\n"
+    "La sección 'Descripción' debe constar ÚNICAMENTE de los siguientes párrafos (máximo 3 párrafos en total). NO agregues ningún otro párrafo.\n\n"
+
+    "1. PÁRRAFO 1: OBJETIVO DEL PROYECTO (Siempre presente)\n"
+    "   - Debe iniciar EXACTAMENTE con: 'La iniciativa tiene como objetivo '\n"
+    "   - Transcribe de forma EXACTA y LITERAL únicamente la declaración del objetivo como aparece en el PPTX.\n"
+    "   - PROHIBIDO: No agregues explicaciones del proyecto, no describas qué hace el proyecto, no incluyas antecedentes, no menciones su duración, territorios, componentes, ni rol ejecutor. Limítate de forma estricta y exclusiva a copiar el objetivo.\n\n"
+
+    "2. PÁRRAFO 2: APORTE FINANCIERO DE LA FUNDACIÓN SANTO DOMINGO (Siempre presente)\n"
+    "   - Redacta el aporte de la Fundación Santo Domingo utilizando uno de estos dos patrones (elige según el nivel de detalle financiero del PPTX):\n"
+    "     * Patrón A (Monto global): 'La Fundación Santo Domingo aportará $[FSD], por su parte, los aliados contribuirán con $[aliados total], lo que representa un apalancamiento del [DFL]% sobre el total de los recursos movilizados'\n"
+    "     * Patrón B (Desglose especie/efectivo): 'La Fundación Santo Domingo aportará $[FSD Total], de los cuales $[especie] MM corresponden a aportes en especie[ ($[A] MM para [territorio] y $[B] MM para [territorio])] y el resto en efectivo [o $[efectivo] MM a aportes en efectivo si el texto descriptivo del PPTX detalla explícitamente el desglose de efectivo]'\n"
+    "   - NOTA: No agregues descripciones de para qué se usarán los recursos.\n\n"
+
+    "3. PÁRRAFO 3: APORTE FINANCIERO DE LOS ALIADOS (Presente solo si hay aliados)\n"
+    "   - Redacta el aporte de los aliados según corresponda (solo montos, nombres de aliados y opcionalmente TRM o administración; sin detallar el propósito de los recursos):\n"
+    "     * Aliado administrado por FSD: 'Por su parte, [aliado] aportará $[monto][, lo que representa un apalancamiento del [DFL]% sobre el total de los recursos movilizados]. Los recursos del aliado serán administrados directamente por la Fundación'\n"
+    "     * Aliado en moneda extranjera: 'Los recursos de [aliado], por USD $[monto], serán administrados por la Fundación Santo Domingo y se estiman con una TRM de $[valor]'\n"
+    "     * Aliado con especie: 'Los aportes de [aliado] corresponden a contribuciones en especie por $[monto]'\n\n"
+
+    "REGLA CRÍTICA DE PRIORIDAD PARA APORTES FINANCIEROS:\n"
     "1. El texto descriptivo (los bullets, notas e información escrita de forma secuencial dentro de la diapositiva) es siempre tu única guía definitiva para los desgloses financieros (como especie, efectivo, desgloses territoriales).\n"
     "2. NUNCA intentes realizar operaciones matemáticas, sumas, restas o deducciones aritméticas sobre los valores financieros. Extrae y transcribe los montos tal como están escritos de forma explícita.\n"
     "3. Extrae los aportes totales de cada entidad guiándote únicamente por los valores explícitos asociados al nombre de cada entidad en la diapositiva (por ejemplo, el total de la Fundación Santo Domingo es el valor que aparece junto o abajo de 'FSD' o 'Fundación Santo Domingo', y el del aliado es el valor que aparece junto al nombre del aliado). No los intercambies ni los asocies erróneamente.\n"
     "4. No intentes deducir ni calcular un aporte de efectivo individual para la Fundación; si el texto descriptivo del PPTX no detalla de forma explícita el desglose de efectivo correspondiente a la Fundación Santo Domingo, debes usar la frase 'y el resto en efectivo' en lugar de un monto numérico.\n\n"
-    "PÁRRAFO DE FSD\n"
-    "Siempre presente. Siempre empieza con 'La Fundación Santo Domingo aportará...'. Dos patrones:\n"
-    "1. Cuando el aporte FSD es un monto global (solo montos, sin describir el propósito específico del recurso):\n"
-    "'La Fundación Santo Domingo aportará $[FSD], por su parte, los aliados contribuirán con $[aliados total], lo que representa un apalancamiento del [DFL]% sobre el total de los recursos movilizados'\n"
-    "- El DFL ya quedó aquí — no repetirlo en el párrafo de aliados.\n"
-    "2. Cuando el PPTX tiene bullet con desglose especie/efectivo (solo montos y territorios, sin describir el propósito específico):\n"
-    "'La Fundación Santo Domingo aportará $[FSD Total], de los cuales $[especie] MM corresponden a aportes en especie[ ($[A] MM para [territorio] y $[B] MM para [territorio])] y el resto en efectivo [o $[efectivo] MM a aportes en efectivo si el texto descriptivo del PPTX detalla explícitamente el desglose de efectivo individual para la Fundación]'\n"
-    "- El desglose por territorio se incluye solo si el bullet lo especifica. Extrae las cifras del desglose tal como aparecen en el PPTX y organízalas según esta estructura. Este patrón no incluye el DFL — incluirlo en el párrafo de aliados.\n\n"
-    "PÁRRAFO DE ALIADOS\n"
-    "Siempre presente cuando hay aliados. SOLO menciona el monto, el nombre del aliado y, si aplica, el mecanismo de administración. NO describas el propósito o destino específico del recurso. Tres variantes:\n"
-    "- Aliado con recursos administrados por FSD:\n"
-    "'Por su parte, [aliado] aportará $[monto][, lo que representa un apalancamiento del [DFL]% sobre el total de los recursos movilizados]. Los recursos del aliado serán administrados directamente por la Fundación'\n"
-    "- Aliado con recursos en moneda extranjera:\n"
-    "'Los recursos de [aliado], por USD $[monto], serán administrados por la Fundación Santo Domingo y se estiman con una TRM de $[valor]'\n"
-    "- Aliado con aporte en especie:\n"
-    "'Los aportes de [aliado] corresponden a contribuciones en especie por $[monto]'\n"
-    "- Tomar casi literal del bullet del PPTX, usando solo la versión más concisa. El DFL va aquí solo si no se incluyó en el párrafo de FSD.\n\n"
-    "PROHIBIDO EN PÁRRAFOS FINANCIEROS: descripción del propósito o destino específico de los recursos, desglose interno del aporte FSD por partidas específicas, flujo de caja o calendario de desembolsos, nota sobre GMF."
+
+    "RESTRICCIÓN ABSOLUTA Y CRÍTICA (NUNCA INCLUYAS ESTO):\n"
+    "Está TOTALMENTE PROHIBIDO incluir cualquier párrafo o frase descriptiva u operativa que mencione:\n"
+    "- La duración del proyecto (ej: 'con una duración de X meses').\n"
+    "- Los territorios de desarrollo o ejecución (ej: 'se desarrollará en los territorios de...').\n"
+    "- El rol ejecutor de la Fundación (ej: 'donde la Fundación actuará como ejecutor').\n"
+    "- Los componentes principales o específicos del proyecto (ej: 'La iniciativa contempla cuatro componentes...').\n"
+    "- Desgloses presupuestales operativos específicos (ej: 'Dentro del presupuesto de VSP se contempla...').\n"
+    "Cualquier texto de este tipo en la Descripción causará el rechazo inmediato del documento."
 )
 
 _PARRAFO_LOGICA_REFRENDACION = (
     "LÓGICA DE PÁRRAFOS para la Solicitud de refrendación (párrafos corridos, sin viñetas ni subtítulos):\n"
-    "Párrafo 1 (siempre): Qué se solicita. Empieza con: 'Se presenta solicitud de refrendación por $[monto]'. Solo el monto y la acción general, SIN describir el propósito en detalle.\n"
+    "Párrafo 1 (siempre): Qué se solicita y para qué. Empieza con: 'Se presenta solicitud de refrendación por $[monto], destinados a [propósito o destino concreto del dinero tal como aparece en el PPTX]'.\n"
     "Párrafo 2 (siempre): Copia y pega de forma muy resumida el texto más conciso del PPTX que describa qué busca la refrendación. Empieza con: 'La refrendación busca [texto muy breve tomado del PPTX]'. UNA sola oración.\n"
     "Párrafo 3 (solo si el PPTX menciona fases): Lista únicamente las fases enumeradas en el PPTX, sin agregar descripción adicional. Formato: 'El proyecto se enmarca en [N] fases: [Fase 1], [Fase 2], [Fase 3]...'.\n\n"
     "REGLAS DE LA TABLA FINANCIERA DE REFRENDACIÓN (OBLIGATORIA):\n"
@@ -181,6 +195,7 @@ def _writer_system_prompt(meeting_type: str, assignment: WriterAssignment) -> st
         f"Tu tarea es redactar el cuerpo de UNA sola sección de {meeting_type}. "
         f"{_FOUNDATION_NOTE}\n\n"
         "Debes seguir ESTRICTAMENTE la estructura y orden indicados en el 'Formato esperado de salida' que recibirás en el prompt.\n\n"
+        f"{_IDENTIFICACION_NOTE}\n\n"
         f"{estado_section}"
         f"{logica_parrafos}\n\n"
         f"{_PROHIBITED_CONTENT}\n\n"
